@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSN Student Card Verification Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .header-text {
+            text-align: center;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .header-text h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-text p {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .search-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            background: white;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        /* Student Card Styles */
+        .student-card {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            animation: cardAppear 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .card-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .verification-status {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .student-photo {
+            text-align: center;
+        }
+
+        .student-img {
+            width: 200px;
+            height: 250px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            object-fit: cover;
+        }
+
+        .student-img:hover {
+            transform: scale(1.05);
+        }
+
+        .student-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.3s ease;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: #7f8c8d;
+            flex: 1;
+            text-align: right;
+        }
+
+        .qr-section {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-text h1 {
+                font-size: 2em;
+            }
+
+            .card-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .student-img {
+                width: 150px;
+                height: 180px;
+            }
+
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .detail-value {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-text h1 {
+                font-size: 1.5em;
+            }
+
+            .search-section {
+                padding: 20px;
+            }
+
+            .student-card {
+                padding: 20px;
+            }
+
+            .student-details {
+                padding: 15px;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a4844f22-3be0-48b4-9e79-f350d477606e.png" alt="BSN University official logo with blue and gold colors featuring academic symbols like books and graduation cap on white background" class="logo">
+                </div>
+                <div class="header-text">
+                    <h1>BSN Student Portal</h1>
+                    <p>Official Student Card Verification System</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="studentId">Enter Student ID Number:</label>
+                    <input type="text" id="studentId" class="form-input" placeholder="e.g., BSN2024001" required>
+                </div>
+                <button type="submit" class="search-btn">Verify Student Card</button>
+            </form>
+
+            <!-- Loading Animation -->
+            <div class="loading" id="loadingAnimation">
+                <div class="spinner"></div>
+                <p>Verifying student information...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage">
+                Student ID not found. Please check the ID number and try again.
+            </div>
+        </div>
+
+        <!-- Student Card Display -->
+        <div class="student-card" id="studentCard">
+            <div class="card-header">
+                <h2 class="card-title">Student Information Card</h2>
+                <span class="verification-status">Verified</span>
+            </div>
+
+            <div class="card-content">
+                <div class="student-photo">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ada9bed7-c436-4aef-8947-7556062f37a5.png" alt="Professional student ID photo of a young person wearing formal attire with neutral background" class="student-img" id="studentPhoto">
+                </div>
+
+                <div class="student-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Full Name:</span>
+                        <span class="detail-value" id="studentName">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Student ID:</span>
+                        <span class="detail-value" id="displayStudentId">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Program:</span>
+                        <span class="detail-value" id="studentProgram">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Year Level:</span>
+                        <span class="detail-value" id="yearLevel">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Academic Year:</span>
+                        <span class="detail-value" id="academicYear">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Enrollment Status:</span>
+                        <span class="detail-value" id="enrollmentStatus">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Birth:</span>
+                        <span class="detail-value" id="dateOfBirth">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Contact Number:</span>
+                        <span class="detail-value" id="contactNumber">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email Address:</span>
+                        <span class="detail-value" id="emailAddress">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Card Expiry:</span>
+                        <span class="detail-value" id="cardExpiry">-</span>
+                    </div>
+                </div>
+
+                <div class="qr-section">
+                    <h3>Digital Verification</h3>
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/eb59369c-aa7f-4795-b281-7ebb914105a2.png" alt="QR code for digital student verification containing encrypted student data and security features" class="qr-code">
+                    <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
+                        Scan this QR code for instant verification
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2024 BSN University. All rights reserved. | Student Information System v2.1</p>
+        </div>
+    </div>
+
+    <script>
+        // Mock student database
+        const studentDatabase = {
+            'BSN2024001': {
+                name: 'Maria Santos Rodriguez',
+                id: 'BSN2024001',
+                program: 'Bachelor of Science in Nursing',
+                yearLevel: '3rd Year',
+                academicYear: '2024-2025',
+                status: 'Active - Regular Student',
+                dob: 'March 15, 2003',
+                contact: '+63 912 345 6789',
+                email: 'maria.santos@bsn.edu.ph',
+                expiry: 'June 30, 2025',
+                photo: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9415dda4-2eff-44d6-813a-689cf1e5cfa5.png'
+            },
+            'BSN9263748': {
+                name: 'Mr. Abid Hussain',
+                id: 'BSN9263748',
+                program: 'Diploma in Operation Theatre Technology (OT Diploma)',
+                yearLevel: '4th Year',
+                academicYear: '2018-2021',
+                status: 'Active',
+                dob: '01-05-1983',
+                contact: '+92 343 2443743', 
+                expiry: 'June 30, 2031',
+                photo: 'picture.png'
+            },
+            'BSN2024003': {
+                name: 'Anna Grace Dela Cruz',
+                id: 'BSN2024003',
+                program: 'Bachelor of Science in Nursing',
+                yearLevel: '4th Year',
+                academicYear: '2024-2025',
+                status: 'Active - Dean\'s Lister',
+                dob: 'December 10, 2002',
+                contact: '+63 923 456 7890',
+                email: 'anna.delacruz@bsn.edu.ph',
+                expiry: 'June 30, 2025',
+                photo: 'https://placehold.co/200x250'
+            },
+            'BSN2024004': {
+                name: 'Robert James Wilson',
+                id: 'BSN2024004',
+                program: 'Bachelor of Science in Nursing',
+                yearLevel: '1st Year',
+                academicYear: '2024-2025',
+                status: 'Active - Transfer Student',
+                dob: 'May 18, 2005',
+                contact: '+63 918 765 4321',
+                email: 'robert.wilson@bsn.edu.ph',
+                expiry: 'June 30, 2025',
+                photo: 'https://placehold.co/200x250'
+            },
+            'BSN2024005': {
+                name: 'Sofia Isabel Reyes',
+                id: 'BSN2024005',
+                program: 'Bachelor of Science in Nursing',
+                yearLevel: '3rd Year',
+                academicYear: '2024-2025',
+                status: 'Active - Exchange Student',
+                dob: 'January 28, 2003',
+                contact: '+63 925 678 9012',
+                email: 'sofia.reyes@bsn.edu.ph',
+                expiry: 'June 30, 2025',
+                photo: 'https://placehold.co/200x250'
+            }
+        };
+
+        // Form elements
+        const searchForm = document.getElementById('searchForm');
+        const studentIdInput = document.getElementById('studentId');
+        const loadingAnimation = document.getElementById('loadingAnimation');
+        const errorMessage = document.getElementById('errorMessage');
+        const studentCard = document.getElementById('studentCard');
+
+        // Student detail elements
+        const elements = {
+            name: document.getElementById('studentName'),
+            id: document.getElementById('displayStudentId'),
+            program: document.getElementById('studentProgram'),
+            yearLevel: document.getElementById('yearLevel'),
+            academicYear: document.getElementById('academicYear'),
+            status: document.getElementById('enrollmentStatus'),
+            dob: document.getElementById('dateOfBirth'),
+            contact: document.getElementById('contactNumber'),
+            email: document.getElementById('emailAddress'),
+            expiry: document.getElementById('cardExpiry'),
+            photo: document.getElementById('studentPhoto')
+        };
+
+        // Handle form submission
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const studentId = studentIdInput.value.trim().toUpperCase();
+            
+            if (!studentId) {
+                showError('Please enter a student ID number.');
+                return;
+            }
+
+            searchStudent(studentId);
+        });
+
+        // Auto-format student ID input
+        studentIdInput.addEventListener('input', function(e) {
+            let value = e.target.value.toUpperCase();
+            // Remove any non-alphanumeric characters
+            value = value.replace(/[^A-Z0-9]/g, '');
+            e.target.value = value;
+        });
+
+        // Add enter key support
+        studentIdInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        function searchStudent(studentId) {
+            // Hide previous results and errors
+            hideAllMessages();
+            
+            // Show loading animation
+            loadingAnimation.style.display = 'block';
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                loadingAnimation.style.display = 'none';
+                
+                if (studentDatabase[studentId]) {
+                    displayStudentInfo(studentDatabase[studentId]);
+                } else {
+                    showError('Student ID "' + studentId + '" not found. Please check the ID number and try again.');
+                }
+            }, 1500);
+        }
+
+        function displayStudentInfo(student) {
+            // Populate student information
+            elements.name.textContent = student.name;
+            elements.id.textContent = student.id;
+            elements.program.textContent = student.program;
+            elements.yearLevel.textContent = student.yearLevel;
+            elements.academicYear.textContent = student.academicYear;
+            elements.status.textContent = student.status;
+            elements.dob.textContent = student.dob;
+            elements.contact.textContent = student.contact;
+            elements.email.textContent = student.email;
+            elements.expiry.textContent = student.expiry;
+            
+            // Update photo with detailed alt text
+            elements.photo.src = 'https://placehold.co/200x250';
+            elements.photo.alt = `Professional student ID photo of ${student.name}, a BSN student wearing formal attire with a neutral background`;
+            
+            // Show student card
+            studentCard.style.display = 'block';
+            
+            // Scroll to card
+            setTimeout(() => {
+                studentCard.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }, 100);
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideAllMessages() {
+            errorMessage.style.display = 'none';
+            studentCard.style.display = 'none';
+        }
+
+        // Add some interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus to input field on load
+            studentIdInput.focus();
+            
+            // Add sample student IDs for demonstration
+            const sampleIds = Object.keys(studentDatabase);
+            console.log('Sample Student IDs for testing:', sampleIds);
+            
+            // Add tooltip functionality
+            const searchBtn = document.querySelector('.search-btn');
+            searchBtn.addEventListener('mouseenter', function() {
+                if (!studentIdInput.value.trim()) {
+                    searchBtn.title = 'Please enter a student ID first';
+                } else {
+                    searchBtn.title = 'Click to verify student information';
+                }
+            });
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                studentIdInput.focus();
+                studentIdInput.select();
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                studentIdInput.value = '';
+                hideAllMessages();
+                studentIdInput.focus();
+            }
+        });
+
+        // Add print functionality for student cards
+        function printStudentCard() {
+            if (studentCard.style.display === 'block') {
+                window.print();
+            }
+        }
+
+        // Add service worker for offline functionality (basic)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // This would register a service worker in a real application
+                console.log('Service Worker support detected');
+            });
+        }
+    </script>
+</body>
+</html>
+
